@@ -1,10 +1,11 @@
 ---
 /**
  * AdSlot.astro — a reserved-space ad hole (ticket 04).
- * OFF by default: renders an empty, correctly-sized placeholder so switching
- * ads on later causes ZERO layout shift. When SITE.monetization.ads.enabled
- * is true and a publisher id is set, it renders the AdSense ins tag instead —
- * same box, so no reflow.
+ * When SITE.monetization.ads is enabled (and a publisher id is set) it renders
+ * the live AdSense ins tag. When ads are OFF it renders a labelled placeholder
+ * ONLY during local development (`npm run dev`) so we can design against the
+ * reserved space — in a production build it renders nothing, so real visitors
+ * never see "reserved" boxes.
  */
 import { SITE } from '../lib/site.config.mjs';
 
@@ -19,6 +20,8 @@ interface Props {
 const { format = 'rectangle', slot = '', label } = Astro.props;
 const ads = SITE.monetization.ads;
 const live = ads.enabled && ads.adsensePublisherId;
+/** Show the grey placeholder only while developing locally, never in prod. */
+const showPlaceholder = !live && import.meta.env.DEV;
 ---
 {live ? (
   <aside class="ad-slot ad-slot--live" data-format={format} aria-label="Advertisement">
@@ -32,8 +35,8 @@ const live = ads.enabled && ads.adsensePublisherId;
       data-full-width-responsive="true"
     ></ins>
   </aside>
-) : (
+) : showPlaceholder ? (
   <aside class="ad-slot" data-format={format} aria-hidden="true">
     <span class="ad-label">{label ?? `Ad slot · ${format} · reserved`}</span>
   </aside>
-)}
+) : null}

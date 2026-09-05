@@ -18,6 +18,14 @@ import {
 } from '../lib/seo.mjs';
 
 const mode = SITE.layoutMode === 'grid' ? 'grid' : 'list';
+/**
+ * Ad regions are shown when ads are live (approved + publisher id set) OR while
+ * developing locally, so we can design against the reserved slots. In a
+ * production build with ads still off we drop the ad rail entirely and let the
+ * results pane use the full width — no empty column, no placeholder boxes.
+ */
+const adsLive = SITE.monetization.ads.enabled && SITE.monetization.ads.adsensePublisherId;
+const showAdRegions = adsLive || import.meta.env.DEV;
 const description =
   'Pick your battery and a gadget type to see everything that runs on the battery you already own — each one marked made for it, fits as-is, or needs an adapter, and checked by hand.';
 const coverageNames = platforms.map((p) => p.name).join(', ');
@@ -39,7 +47,7 @@ const jsonLdNodes = [
     <p class="lead">Pick your battery and the kind of gadget you want. See what runs on the battery you already own — and whether it clicks straight on or needs an adapter.</p>
   </section>
 
-  <form class="app-shell container" aria-label="Compatibility finder">
+  <form class={`app-shell container${showAdRegions ? '' : ' app-shell--noads'}`} aria-label="Compatibility finder">
     <!-- FILTER RAIL (borderless — no box, no grey) -->
     <aside class="rail">
       <p class="rail-title">Filters</p>
@@ -76,8 +84,9 @@ const jsonLdNodes = [
         </div>
       </fieldset>
 
-      <!-- Left-side ad (below the filters). -->
-      <AdSlot format="rectangle" label="Ad slot · reserved" />
+      {showAdRegions && (
+        <AdSlot format="rectangle" label="Ad slot · reserved" />
+      )}
     </aside>
 
     <!-- RESULTS PANE -->
@@ -114,11 +123,12 @@ const jsonLdNodes = [
       <nav class="pagination" data-pagination hidden aria-label="Results pages"></nav>
     </div>
 
-    <!-- RIGHT-SIDE AD RAIL (sticky, wide screens only). -->
-    <aside class="ad-rail" aria-label="Advertisements">
-      <AdSlot format="rectangle" label="Ad slot · reserved" />
-      <AdSlot format="rectangle" label="Ad slot · reserved" />
-    </aside>
+    {showAdRegions && (
+      <aside class="ad-rail" aria-label="Advertisements">
+        <AdSlot format="rectangle" label="Ad slot · reserved" />
+        <AdSlot format="rectangle" label="Ad slot · reserved" />
+      </aside>
+    )}
   </form>
 </Layout>
 

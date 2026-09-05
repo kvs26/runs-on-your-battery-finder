@@ -187,6 +187,8 @@ code, kbd { font-family: var(--font-mono); font-size: 0.9em; }
 /* Wide screens: filters | data | right-hand ad rail (both sides monetised). */
 @media (min-width: 1160px) {
   .app-shell { grid-template-columns: var(--sidebar) minmax(0, 1fr) var(--ad-rail); }
+  /* No ads yet: drop the third column so the results pane uses the full width. */
+  .app-shell--noads { grid-template-columns: var(--sidebar) minmax(0, 1fr); }
 }
 .rail { padding: 0; position: sticky; top: 84px; }
 /* Right ad rail: sticky, only when there's room for a third column. */
