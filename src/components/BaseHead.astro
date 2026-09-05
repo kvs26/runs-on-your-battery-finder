@@ -64,18 +64,7 @@ const ld = jsonLdNodes.length ? graph(jsonLdNodes) : null;
 
 <!-- Icons (one SVG master; drop real assets into /public) -->
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-<link rel="icon" href="/favicon.ico" sizes="any" />
-<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <link rel="manifest" href="/site.webmanifest" />
-
-<!-- Brand font: preload the single body woff2 (font-display:optional => no CLS) -->
-<link
-  rel="preload"
-  href="/fonts/brand.woff2"
-  as="font"
-  type="font/woff2"
-  crossorigin
-/>
 
 {ld && <script type="application/ld+json" set:html={JSON.stringify(ld)} />}
 

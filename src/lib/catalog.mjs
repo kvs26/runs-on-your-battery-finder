@@ -32,9 +32,9 @@ export function platformCategoryPairs() {
   return pairs;
 }
 
-/** Human label + CSS class for a fit type. */
+/** Human label + CSS class for a fit type (plain language). */
 export const FIT = {
-  native: { label: 'Native', badge: 'badge--ok' },
-  direct: { label: 'Direct-fit', badge: 'badge--ok' },
+  native: { label: 'Made for it', badge: 'badge--ok' },
+  direct: { label: 'Fits as-is', badge: 'badge--fit' },
   adapter: { label: 'Needs adapter', badge: 'badge--warn' },
 };

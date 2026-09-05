@@ -7,9 +7,9 @@ const description = 'Common questions about battery-gadget compatibility and how
 const crumbs = [{ name: 'Home', href: '/' }, { name: title }];
 // NOTE: no FAQPage JSON-LD — Google deprecated the rich result (research/03 §1).
 const faqs = [
-  { q: 'Will any brand battery fit any tool?', a: 'No. Batteries fit their own platform natively; cross-brand use needs a direct-fit device or an adapter, which we flag on every entry.' },
-  { q: 'Is a battery included?', a: 'Usually not — most of these gadgets are sold as bare tools. Each entry notes battery-included status.' },
-  { q: 'How current is the data?', a: 'Entries are hand-verified and dated; see the methodology page for the process.' },
+  { q: 'Will any brand battery fit any tool?', a: 'No. A battery always fits its own brand. To use it on another brand you need a gadget that clicks straight on ("fits as-is") or a separate adapter — we mark which on every entry.' },
+  { q: 'Is a battery included?', a: 'Usually not — most of these gadgets are sold as the bare tool. Each entry says whether a battery is in the box.' },
+  { q: 'How current is the data?', a: 'Every entry is checked by hand. See the "How we check" page for the full process.' },
 ];
 ---
 <Layout title={title} description={description} jsonLdNodes={[organizationLd(), breadcrumbLd(crumbs)]}>

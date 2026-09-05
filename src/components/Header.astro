@@ -7,17 +7,14 @@
  */
 import { SITE } from '../lib/site.config.mjs';
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const words = SITE.name.split(' ');
+const lead = words.slice(0, -1).join(' ');
+const last = words.at(-1);
 ---
 <header class="site-header">
   <div class="container bar">
-    <a class="brand" href="/">
-      <span class="mark" aria-hidden="true">
-        <!-- Inline-SVG logo upgrade slot: replace with a real mark, keeps currentColor theming. -->
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true">
-          <path d="M4 13h6l-1 8 11-13h-6l1-8z" />
-        </svg>
-      </span>
-      <span>{SITE.name}</span>
+    <a class="brand" href="/" aria-label={`${SITE.name} — home`}>
+      <span class="wordmark">{lead} <span class="wordmark-accent">{last}</span></span>
     </a>
 
     <div class="header-actions">

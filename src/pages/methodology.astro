@@ -3,8 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import { organizationLd, breadcrumbLd } from '../lib/seo.mjs';
 import { platforms } from '../lib/catalog.mjs';
-const title = 'Methodology';
-const description = 'How every compatibility entry is researched, flagged, and hand-verified before it appears here.';
+const title = 'How we check';
+const description = 'How every compatibility entry is researched, labeled, and checked by hand before it appears here.';
 const crumbs = [{ name: 'Home', href: '/' }, { name: title }];
 ---
 <Layout title={title} description={description} jsonLdNodes={[organizationLd(), breadcrumbLd(crumbs)]}>
@@ -25,11 +25,11 @@ const crumbs = [{ name: 'Home', href: '/' }, { name: title }];
 
     <h2>Fit types</h2>
     <table class="data-table">
-      <thead><tr><th>Flag</th><th>Meaning</th></tr></thead>
+      <thead><tr><th>Label</th><th>What it means</th></tr></thead>
       <tbody>
-        <tr><td><span class="badge badge--ok">Native</span></td><td>Built for this exact battery platform by the same brand.</td></tr>
-        <tr><td><span class="badge badge--ok">Direct-fit</span></td><td>A third-party device whose foot accepts this platform's battery without an adapter.</td></tr>
-        <tr><td><span class="badge badge--warn">Needs adapter</span></td><td>Works only with a separate adapter plate; the adapter is called out in the notes.</td></tr>
+        <tr><td><span class="badge badge--ok">Made for it</span></td><td>Built for this exact battery by the same brand.</td></tr>
+        <tr><td><span class="badge badge--fit">Fits as-is</span></td><td>A gadget from another brand whose foot accepts this battery with no adapter.</td></tr>
+        <tr><td><span class="badge badge--warn">Needs adapter</span></td><td>Works only with a separate adapter part; we name the adapter in the notes.</td></tr>
       </tbody>
     </table>
 

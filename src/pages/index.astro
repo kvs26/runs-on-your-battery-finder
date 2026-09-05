@@ -19,7 +19,7 @@ import {
 
 const mode = SITE.layoutMode === 'grid' ? 'grid' : 'list';
 const description =
-  'Pick a battery platform and category to find every gadget that runs on it — each flagged native, direct-fit, or needs-adapter, and hand-verified.';
+  'Pick your battery and a gadget type to see everything that runs on the battery you already own — each one marked made for it, fits as-is, or needs an adapter, and checked by hand.';
 const coverageNames = platforms.map((p) => p.name).join(', ');
 
 const jsonLdNodes = [
@@ -34,52 +34,57 @@ const jsonLdNodes = [
 ];
 ---
 <Layout title={null} description={description} jsonLdNodes={jsonLdNodes}>
-  <section class="hero container">
+  <section class="hero hero--home container">
     <h1>What runs on your battery?</h1>
-    <p class="lead">{description}</p>
-    <ol class="steps">
-      <li><strong>Pick your battery platform</strong> below (or leave it on "All platforms" to browse everything).</li>
-      <li><strong>Pick a category</strong> — fan, vacuum, light, and more — or browse all categories.</li>
-      <li><strong>Check the badge</strong> on each result: <span class="badge badge--ok">Native</span>/<span class="badge badge--ok">Direct-fit</span> plug straight in; <span class="badge badge--warn">Needs adapter</span> means you'll need an extra part (linked in the note).</li>
-    </ol>
-    <p class="coverage-note">Currently covering <strong>{coverageNames}</strong> — hand-verified only, so a few smaller brands (Kobalt, Bauer) aren't listed yet. See <a href="/methodology">methodology</a>.</p>
+    <p class="lead">Pick your battery and the kind of gadget you want. See what runs on the battery you already own — and whether it clicks straight on or needs an adapter.</p>
   </section>
 
   <form class="app-shell container" aria-label="Compatibility finder">
-    <!-- FILTER RAIL -->
-    <aside class="rail card">
+    <!-- FILTER RAIL (borderless — no box, no grey) -->
+    <aside class="rail">
+      <p class="rail-title">Filters</p>
       <div class="field">
-        <label for="f-platform">Battery platform</label>
+        <label for="f-platform">Your battery</label>
         <select id="f-platform" name="platform" data-filter="platform">
-          <option value="">All platforms</option>
+          <option value="">All batteries</option>
           {platforms.map((p) => <option value={p.slug}>{p.name}</option>)}
         </select>
       </div>
       <div class="field">
-        <label for="f-category">Category</label>
+        <label for="f-category">Gadget type</label>
         <select id="f-category" name="category" data-filter="category">
-          <option value="">All categories</option>
+          <option value="">All gadgets</option>
           {categories.map((c) => <option value={c.slug}>{c.name}</option>)}
         </select>
       </div>
       <fieldset class="field">
-        <span class="legend">Fit type</span>
-        <label class="choice"><input type="checkbox" name="fit" value="native" data-filter="fit"> Native</label>
-        <label class="choice"><input type="checkbox" name="fit" value="direct" data-filter="fit"> Direct-fit</label>
-        <label class="choice"><input type="checkbox" name="fit" value="adapter" data-filter="fit"> Needs adapter</label>
+        <span class="legend">
+          Fit
+          <button class="info" type="button" aria-label="What the fit labels mean">
+            i
+            <span class="tip" role="tooltip">
+              <strong>Made for it</strong> — same brand as your battery.<br />
+              <strong>Fits as-is</strong> — another brand, clicks on with no adapter.<br />
+              <strong>Needs adapter</strong> — works only with a separate adapter part.
+            </span>
+          </button>
+        </span>
+        <div class="fit-toggles">
+          <label class="choice"><input type="checkbox" name="fit" value="native" data-filter="fit" /> Made for it</label>
+          <label class="choice"><input type="checkbox" name="fit" value="direct" data-filter="fit" /> Fits as-is</label>
+          <label class="choice"><input type="checkbox" name="fit" value="adapter" data-filter="fit" /> Needs adapter</label>
+        </div>
       </fieldset>
-      <p class="rail-legend">
-        <strong>Native</strong> = made by the battery's own brand.
-        <strong>Direct-fit</strong> = third-party, no adapter needed.
-        <strong>Needs adapter</strong> = works via a separate adapter plate — check the note before buying.
-      </p>
+
+      <!-- Left-side ad (below the filters). -->
+      <AdSlot format="rectangle" label="Ad slot · reserved" />
     </aside>
 
     <!-- RESULTS PANE -->
     <div class={`results-pane results--${mode}`}>
       <div class="results-head">
         <h2 class="visually-hidden">Results</h2>
-        <p class="result-count" data-result-count aria-live="polite">{products.length} results</p>
+        <p class="result-count" aria-live="polite"><strong data-count>{products.length}</strong> gadgets</p>
       </div>
 
       <div id="result-list">
@@ -88,7 +93,7 @@ const jsonLdNodes = [
           const platformName = platformBySlug(p.platform)?.name ?? p.platform;
           const categoryName = categoryBySlug(p.category)?.name ?? p.category;
           return (
-            <article class="result card" data-platform={p.platform} data-category={p.category} data-fit={p.fit}>
+            <article class="result" data-platform={p.platform} data-category={p.category} data-fit={p.fit}>
               {mode === 'grid' && <div class="thumb" aria-hidden="true">image</div>}
               <div>
                 <p class="result-tags">
@@ -104,40 +109,95 @@ const jsonLdNodes = [
         })}
       </div>
 
-      <p class="empty-state" data-empty hidden>No matches. Try clearing a filter.</p>
+      <p class="empty-state" data-empty hidden>No matches yet. Try clearing a filter.</p>
 
-      <!-- MONETIZATION HOLE: ad after the result, space reserved (no CLS). -->
-      <AdSlot format="rectangle" label="Ad slot · 300×250 · reserved (empty until approved)" />
+      <nav class="pagination" data-pagination hidden aria-label="Results pages"></nav>
     </div>
+
+    <!-- RIGHT-SIDE AD RAIL (sticky, wide screens only). -->
+    <aside class="ad-rail" aria-label="Advertisements">
+      <AdSlot format="rectangle" label="Ad slot · reserved" />
+      <AdSlot format="rectangle" label="Ad slot · reserved" />
+    </aside>
   </form>
 </Layout>
 
 <script>
-  // Vanilla-JS filter island (ticket 08). Show/hide server-rendered results.
-  const form = document.querySelector('.app-shell');
-  if (form) {
-    const items = Array.from(form.querySelectorAll('.result'));
-    const countEl = form.querySelector('[data-result-count]');
-    const emptyEl = form.querySelector('[data-empty]');
+  // Vanilla-JS filter + pagination island (ticket 08). Server-rendered results
+  // stay crawlable; JS shows one page at a time and rebuilds the pager.
+  const shell = document.querySelector('.app-shell');
+  if (shell) {
+    const PER_PAGE = 8;
+    const items = Array.from(shell.querySelectorAll('.result'));
+    const countEl = shell.querySelector('[data-count]');
+    const emptyEl = shell.querySelector('[data-empty]');
+    const pager = shell.querySelector('[data-pagination]');
+    let filtered = items.slice();
+    let page = 1;
 
-    function apply() {
-      const platform = form.querySelector('[data-filter="platform"]').value;
-      const category = form.querySelector('[data-filter="category"]').value;
-      const fits = Array.from(form.querySelectorAll('[data-filter="fit"]:checked')).map((el) => el.value);
-      let shown = 0;
-      for (const el of items) {
-        const ok =
-          (!platform || el.dataset.platform === platform) &&
-          (!category || el.dataset.category === category) &&
-          (fits.length === 0 || fits.includes(el.dataset.fit));
-        el.hidden = !ok;
-        if (ok) shown++;
-      }
-      if (countEl) countEl.textContent = shown + (shown === 1 ? ' result' : ' results');
-      if (emptyEl) emptyEl.hidden = shown !== 0;
+    function applyFilters() {
+      const platform = shell.querySelector('[data-filter="platform"]').value;
+      const category = shell.querySelector('[data-filter="category"]').value;
+      const fits = Array.from(shell.querySelectorAll('[data-filter="fit"]:checked')).map((el) => el.value);
+      filtered = items.filter((el) =>
+        (!platform || el.dataset.platform === platform) &&
+        (!category || el.dataset.category === category) &&
+        (fits.length === 0 || fits.includes(el.dataset.fit))
+      );
+      page = 1;
+      render();
     }
 
-    form.addEventListener('change', apply);
-    form.addEventListener('submit', (e) => e.preventDefault());
+    function render() {
+      const total = filtered.length;
+      const pages = Math.max(1, Math.ceil(total / PER_PAGE));
+      if (page > pages) page = pages;
+      const start = (page - 1) * PER_PAGE;
+      for (const el of items) el.hidden = true;
+      filtered.slice(start, start + PER_PAGE).forEach((el) => { el.hidden = false; });
+      if (countEl) countEl.textContent = String(total);
+      if (emptyEl) emptyEl.hidden = total !== 0;
+      renderPager(pages);
+    }
+
+    function renderPager(pages) {
+      if (!pager) return;
+      pager.replaceChildren();
+      if (pages <= 1) { pager.hidden = true; return; }
+      pager.hidden = false;
+      const go = (target) => { page = target; render(); shell.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+      const mk = (text, target, opts = {}) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'page-btn';
+        b.textContent = text;
+        if (opts.current) b.setAttribute('aria-current', 'true');
+        if (opts.disabled) b.disabled = true;
+        if (opts.aria) b.setAttribute('aria-label', opts.aria);
+        if (!opts.disabled) b.addEventListener('click', () => go(target));
+        return b;
+      };
+      pager.appendChild(mk('‹', page - 1, { disabled: page === 1, aria: 'Previous page' }));
+      const nums = [];
+      for (let i = 1; i <= pages; i++) {
+        if (i === 1 || i === pages || Math.abs(i - page) <= 1) nums.push(i);
+        else if (nums[nums.length - 1] !== '…') nums.push('…');
+      }
+      for (const n of nums) {
+        if (n === '…') {
+          const s = document.createElement('span');
+          s.className = 'page-ellipsis';
+          s.textContent = '…';
+          pager.appendChild(s);
+        } else {
+          pager.appendChild(mk(String(n), n, { current: n === page, aria: `Page ${n}` }));
+        }
+      }
+      pager.appendChild(mk('›', page + 1, { disabled: page === pages, aria: 'Next page' }));
+    }
+
+    shell.addEventListener('change', applyFilters);
+    shell.addEventListener('submit', (e) => e.preventDefault());
+    render();
   }
 </script>

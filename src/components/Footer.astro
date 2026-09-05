@@ -7,13 +7,18 @@
 import { SITE } from '../lib/site.config.mjs';
 const year = new Date().getFullYear();
 const affiliateOn = SITE.monetization.affiliate.enabled;
+const words = SITE.name.split(' ');
+const lead = words.slice(0, -1).join(' ');
+const last = words.at(-1);
 ---
 <footer class="site-footer">
   <div class="container">
     <div class="footer-grid">
       <div class="footer-col">
-        <a class="brand" href="/"><span>{SITE.name}</span></a>
-        <p class="muted" style="margin-top:var(--space-3)">{SITE.tagline}</p>
+        <a class="brand" href="/">
+          <span class="wordmark">{lead} <span class="wordmark-accent">{last}</span></span>
+        </a>
+        <p class="muted footer-tagline">{SITE.tagline}</p>
         {affiliateOn && (
           <p class="affiliate-disclosure">{SITE.monetization.affiliate.disclosure}</p>
         )}
@@ -30,7 +35,7 @@ const affiliateOn = SITE.monetization.affiliate.enabled;
     </div>
 
     <div class="footer-legal">
-      <p>© {year} {SITE.name}. Data hand-verified; see the <a href="/methodology">methodology</a>.</p>
+      <p>© {year} {SITE.name}. Every entry checked by hand; see <a href="/methodology">how we check</a>.</p>
     </div>
   </div>
 </footer>

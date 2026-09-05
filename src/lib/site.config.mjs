@@ -52,8 +52,8 @@ export const SITE = {
   // --- Navigation -------------------------------------------------------
   /** Primary header nav. */
   nav: [
-    { label: 'Finder', href: '/' },
-    { label: 'Methodology', href: '/methodology' },
+    { label: 'Home', href: '/' },
+    { label: 'How we check', href: '/methodology' },
     { label: 'FAQ', href: '/faq' },
     { label: 'About', href: '/about' },
     { label: 'Contact', href: '/contact' },
@@ -64,8 +64,8 @@ export const SITE = {
     {
       heading: 'Site',
       links: [
-        { label: 'Finder', href: '/' },
-        { label: 'Methodology', href: '/methodology' },
+        { label: 'Home', href: '/' },
+        { label: 'How we check', href: '/methodology' },
         { label: 'FAQ', href: '/faq' },
       ],
     },

@@ -24,7 +24,7 @@ const path = `/${platform.slug}/${category.slug}`;
 
 // Programmatic, data-driven title + description (research/03 §4) — no boilerplate.
 const title = `${platform.name} ${category.name}`;
-const description = `See which ${category.name.toLowerCase()} run on a ${platform.name} battery — ${items.length} compatible ${items.length === 1 ? 'item' : 'items'}, each flagged native, direct-fit, or needs-adapter.`;
+const description = `See which ${category.name.toLowerCase()} run on a ${platform.name} battery — ${items.length} that fit, each marked made for it, fits as-is, or needs an adapter.`;
 
 const crumbs = [
   { name: 'Home', href: '/' },
@@ -48,7 +48,7 @@ const jsonLdNodes = [
   <section class="hero container">
     <h1>{title} compatibility</h1>
     <p class="lead">{description}</p>
-    <p class="rail-legend"><strong>Native</strong>/<strong>Direct-fit</strong> plug straight into a {platform.name} battery. <strong>Needs adapter</strong> means a separate adapter is required — see <a href="/methodology">methodology</a>.</p>
+    <p class="rail-legend"><strong>Made for it</strong> and <strong>Fits as-is</strong> click straight onto a {platform.name} battery. <strong>Needs adapter</strong> means a separate part is required — see <a href="/methodology">how we check</a>.</p>
   </section>
 
   <div class="container">
@@ -57,7 +57,7 @@ const jsonLdNodes = [
         {items.map((p) => {
           const fit = FIT[p.fit] ?? { label: p.fit, badge: '' };
           return (
-            <article class="result card">
+            <article class="result">
               <div>
                 <h2 class="result-title"><AffiliateLink label={p.name} affiliate={p.affiliate} /></h2>
                 <p class="result-meta">{p.note}{p.battery_included ? ' · battery included' : ' · battery not included'}</p>
