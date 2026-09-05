@@ -12,8 +12,7 @@
 export const SITE = {
   // --- Identity ---------------------------------------------------------
   /** Production origin, no trailing slash. Drives canonical/OG/sitemap URLs. */
-  // TODO(ticket-06, HITL): replace with the real purchased domain before deploy.
-  url: 'https://example.com',
+  url: 'https://runsonyourbattery.com',
   /** Short brand name — the wordmark text and the <title> suffix. */
   name: 'Runs on Your Battery',
   /** One-line positioning statement, used in default meta descriptions + hero. */
