@@ -1,0 +1,40 @@
+---
+/**
+ * AffiliateLink.astro — data-driven affiliate hole (ticket 05).
+ * Every dataset row may carry an `affiliate` block. When affiliate is OFF, or
+ * the row has no live affiliate_url, this renders the product name as plain
+ * text (no dead <a>). When ON, it renders a rel="sponsored nofollow" CTA.
+ * The disclosure line is rendered only when a sponsored link is actually shown.
+ */
+import { SITE } from '../lib/site.config.mjs';
+
+interface AffiliateData {
+  affiliate_enabled?: boolean;
+  affiliate_url?: string | null;
+  requires_disclosure?: boolean;
+  cta?: string;
+}
+interface Props {
+  /** Visible text (product name). */
+  label: string;
+  /** The row's `affiliate` block. */
+  affiliate?: AffiliateData;
+}
+
+const { label, affiliate = {} } = Astro.props;
+const on = SITE.monetization.affiliate.enabled && affiliate.affiliate_enabled && !!affiliate.affiliate_url;
+const cta = affiliate.cta ?? 'View on Amazon';
+---
+{on ? (
+  <span class="affiliate-link">
+    {label}
+    <a class="affiliate-cta" href={affiliate.affiliate_url} rel="sponsored nofollow" target="_blank">
+      {cta}
+    </a>
+    {affiliate.requires_disclosure !== false && (
+      <span class="affiliate-disclosure"> · {SITE.monetization.affiliate.disclosure}</span>
+    )}
+  </span>
+) : (
+  <span class="affiliate-link">{label}</span>
+)}

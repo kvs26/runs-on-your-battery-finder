@@ -1,0 +1,17 @@
+{
+  "name": "house-template",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The site-factory canonical house template — a themeable static Astro scaffold. Copy into sites/<slug>/ to start a new site.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.3.1"
+  }
+}

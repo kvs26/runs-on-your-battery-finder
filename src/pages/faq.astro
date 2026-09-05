@@ -1,0 +1,26 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { organizationLd, breadcrumbLd } from '../lib/seo.mjs';
+const title = 'FAQ';
+const description = 'Common questions about battery-gadget compatibility and how this finder works.';
+const crumbs = [{ name: 'Home', href: '/' }, { name: title }];
+// NOTE: no FAQPage JSON-LD — Google deprecated the rich result (research/03 §1).
+const faqs = [
+  { q: 'Will any brand battery fit any tool?', a: 'No. Batteries fit their own platform natively; cross-brand use needs a direct-fit device or an adapter, which we flag on every entry.' },
+  { q: 'Is a battery included?', a: 'Usually not — most of these gadgets are sold as bare tools. Each entry notes battery-included status.' },
+  { q: 'How current is the data?', a: 'Entries are hand-verified and dated; see the methodology page for the process.' },
+];
+---
+<Layout title={title} description={description} jsonLdNodes={[organizationLd(), breadcrumbLd(crumbs)]}>
+  <Breadcrumbs items={crumbs} />
+  <article class="container prose faq" style="padding-block:var(--space-12)">
+    <h1>{title}</h1>
+    {faqs.map((f) => (
+      <details>
+        <summary>{f.q}</summary>
+        <p>{f.a}</p>
+      </details>
+    ))}
+  </article>
+</Layout>

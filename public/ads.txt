@@ -1,0 +1,2 @@
+# ads.txt placeholder (ticket 04). When AdSense is approved, replace with:
+# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0

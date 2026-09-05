@@ -1,0 +1,18 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SITE } from '../lib/site.config.mjs';
+import { organizationLd, breadcrumbLd } from '../lib/seo.mjs';
+const title = 'Contact';
+const description = `How to reach ${SITE.name} with corrections, questions, or feedback.`;
+const crumbs = [{ name: 'Home', href: '/' }, { name: title }];
+---
+<Layout title={title} description={description} jsonLdNodes={[organizationLd(), breadcrumbLd(crumbs)]}>
+  <Breadcrumbs items={crumbs} />
+  <article class="container prose" style="padding-block:var(--space-12)">
+    <h1>Contact</h1>
+    <p>The fastest way to reach us is email. We read every message and prioritize data corrections.</p>
+    <p><strong>Email:</strong> <a href="mailto:hello@example.com">hello@example.com</a></p>
+    <p class="muted">Replace this address in <code>src/pages/contact.astro</code> before launch.</p>
+  </article>
+</Layout>

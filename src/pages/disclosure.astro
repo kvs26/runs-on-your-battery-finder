@@ -1,0 +1,22 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { SITE } from '../lib/site.config.mjs';
+import { organizationLd, breadcrumbLd } from '../lib/seo.mjs';
+const title = 'Affiliate disclosure';
+const description = `${SITE.name}'s affiliate relationships and how they are disclosed.`;
+const crumbs = [{ name: 'Home', href: '/' }, { name: title }];
+---
+<Layout title={title} description={description} jsonLdNodes={[organizationLd(), breadcrumbLd(crumbs)]}>
+  <Breadcrumbs items={crumbs} />
+  <article class="container prose" style="padding-block:var(--space-12)">
+    <h1>Affiliate disclosure</h1>
+    <p>{SITE.monetization.affiliate.disclosure}</p>
+    <p>Some links on this site are affiliate links. If you click one and make a purchase, we may earn a
+      commission at no extra cost to you. This never affects which products we list or how we flag
+      their compatibility — those are based only on verified data (see the
+      <a href="/methodology">methodology</a>).</p>
+    <p>Affiliate links are marked up with <code>rel="sponsored nofollow"</code> in line with search-engine
+      guidance.</p>
+  </article>
+</Layout>

@@ -1,0 +1,74 @@
+---
+/**
+ * calculator.astro — TOOL-HERO VARIANT demo (dir 02, Groww-style): centered
+ * calculator + viz, with a right rail that doubles as a monetization + internal
+ * -link hole. For single-calculator niches. Same tokens/components as the base.
+ */
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import AdSlot from '../components/AdSlot.astro';
+import { organizationLd, webApplicationLd, breadcrumbLd } from '../lib/seo.mjs';
+
+const title = 'Runtime calculator';
+const description = 'Estimate how long a gadget runs on a given battery from its watt-hours and the device draw.';
+const crumbs = [{ name: 'Home', href: '/' }, { name: title }];
+const jsonLdNodes = [
+  organizationLd(),
+  breadcrumbLd(crumbs),
+  webApplicationLd({ name: title, description, url: '/calculator' }),
+];
+---
+<Layout title={title} description={description} jsonLdNodes={jsonLdNodes}>
+  <Breadcrumbs items={crumbs} />
+  <div class="tool-hero container">
+    <section class="calc card">
+      <h1>{title}</h1>
+      <p class="lead">{description}</p>
+
+      <form data-calc>
+        <div class="field">
+          <label for="c-wh">Battery capacity (watt-hours)</label>
+          <input id="c-wh" name="wh" type="number" min="0" step="0.1" value="90" />
+        </div>
+        <div class="field">
+          <label for="c-draw">Device draw (watts)</label>
+          <input id="c-draw" name="draw" type="number" min="0" step="0.1" value="30" />
+        </div>
+
+        <div class="viz" aria-live="polite">
+          <div class="figure" data-calc-out>3.0 hrs</div>
+          <p class="muted">Estimated runtime at 100% efficiency</p>
+        </div>
+      </form>
+    </section>
+
+    <aside class="rail-side">
+      <AdSlot format="rectangle" />
+      <div class="popular card">
+        <h2 style="font-size:var(--text-md)">Popular</h2>
+        <ul>
+          <li><a href="/ryobi-18v-one">Ryobi 18V ONE+ gadgets</a></li>
+          <li><a href="/dewalt-20v-max">DeWalt 20V MAX gadgets</a></li>
+          <li><a href="/milwaukee-m18">Milwaukee M18 gadgets</a></li>
+          <li><a href="/">Full finder</a></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</Layout>
+
+<script>
+  // Result computes in-place, no redirect (research/07 tool patterns).
+  const form = document.querySelector('[data-calc]');
+  if (form) {
+    const out = form.querySelector('[data-calc-out]');
+    const recalc = () => {
+      const wh = parseFloat(form.querySelector('#c-wh').value) || 0;
+      const draw = parseFloat(form.querySelector('#c-draw').value) || 0;
+      const hrs = draw > 0 ? wh / draw : 0;
+      out.textContent = hrs > 0 ? `${hrs.toFixed(1)} hrs` : '—';
+    };
+    form.addEventListener('input', recalc);
+    recalc();
+  }
+</script>

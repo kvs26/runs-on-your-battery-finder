@@ -1,0 +1,53 @@
+---
+/**
+ * [platform]/index.astro — platform HUB page (hub -> spoke internal linking,
+ * research/03 §5). Lists every category that has products for this platform.
+ */
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { platforms, categories, productsFor } from '../../lib/catalog.mjs';
+import { organizationLd, breadcrumbLd, itemListLd } from '../../lib/seo.mjs';
+
+export function getStaticPaths() {
+  return platforms.map((p) => ({ params: { platform: p.slug }, props: { platform: p } }));
+}
+
+const { platform } = Astro.props;
+const cats = categories
+  .map((c) => ({ ...c, count: productsFor(platform.slug, c.slug).length }))
+  .filter((c) => c.count > 0);
+
+const path = `/${platform.slug}`;
+const title = `${platform.name} compatible gadgets`;
+const description = `Every category of gadget that runs on a ${platform.name} battery — ${cats.length} categories, hand-verified.`;
+const crumbs = [{ name: 'Home', href: '/' }, { name: platform.name }];
+
+const jsonLdNodes = [
+  organizationLd(),
+  breadcrumbLd(crumbs),
+  itemListLd(cats.map((c) => ({ url: `/${platform.slug}/${c.slug}`, name: c.name }))),
+];
+---
+<Layout title={title} description={description} path={path} jsonLdNodes={jsonLdNodes}>
+  <Breadcrumbs items={crumbs} />
+  <section class="hero container">
+    <h1>{title}</h1>
+    <p class="lead">{description}</p>
+  </section>
+
+  <div class="container">
+    <div class="results--grid">
+      <div id="result-list">
+        {cats.map((c) => (
+          <a class="result card" href={`/${platform.slug}/${c.slug}`}>
+            <div class="thumb" aria-hidden="true">{c.name}</div>
+            <h2 class="result-title">{c.name}</h2>
+            <p class="result-meta">{c.count} compatible {c.count === 1 ? 'product' : 'products'}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+    <AdSlot format="leaderboard" />
+  </div>
+</Layout>

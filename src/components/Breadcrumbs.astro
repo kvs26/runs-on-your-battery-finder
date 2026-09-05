@@ -1,0 +1,20 @@
+---
+/**
+ * Breadcrumbs.astro — visible trail. Pair it with breadcrumbLd() in the page's
+ * jsonLdNodes so the visible trail and the BreadcrumbList JSON-LD match
+ * (Google guidance, research/03 §5).
+ * items: [{ name, href? }] — last item is the current page (no link).
+ */
+interface Crumb { name: string; href?: string; }
+interface Props { items: Crumb[]; }
+const { items } = Astro.props;
+---
+<nav class="breadcrumbs container" aria-label="Breadcrumb">
+  <ol>
+    {items.map((c, i) => (
+      <li>
+        {c.href && i < items.length - 1 ? <a href={c.href}>{c.name}</a> : <span aria-current="page">{c.name}</span>}
+      </li>
+    ))}
+  </ol>
+</nav>

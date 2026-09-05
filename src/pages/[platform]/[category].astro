@@ -1,0 +1,83 @@
+---
+/**
+ * [platform]/[category].astro — long-tail LEAF page (one canonical URL per
+ * platform×category, statically generated). Server-rendered list + ItemList
+ * JSON-LD + breadcrumb + related-platform links (research/03 §2,§5).
+ */
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import AffiliateLink from '../../components/AffiliateLink.astro';
+import { platformCategoryPairs, productsFor, platforms, FIT } from '../../lib/catalog.mjs';
+import { organizationLd, breadcrumbLd, itemListLd } from '../../lib/seo.mjs';
+
+export function getStaticPaths() {
+  return platformCategoryPairs().map(({ platform, category }) => ({
+    params: { platform: platform.slug, category: category.slug },
+    props: { platform, category },
+  }));
+}
+
+const { platform, category } = Astro.props;
+const items = productsFor(platform.slug, category.slug);
+const path = `/${platform.slug}/${category.slug}`;
+
+// Programmatic, data-driven title + description (research/03 §4) — no boilerplate.
+const title = `${platform.name} ${category.name}`;
+const description = `See which ${category.name.toLowerCase()} run on a ${platform.name} battery — ${items.length} compatible ${items.length === 1 ? 'item' : 'items'}, each flagged native, direct-fit, or needs-adapter.`;
+
+const crumbs = [
+  { name: 'Home', href: '/' },
+  { name: platform.name, href: `/${platform.slug}` },
+  { name: category.name },
+];
+
+// Related: same category on other platforms (spread crawl paths).
+const related = platforms
+  .filter((p) => p.slug !== platform.slug && productsFor(p.slug, category.slug).length > 0)
+  .map((p) => ({ name: `${p.name} ${category.name}`, href: `/${p.slug}/${category.slug}` }));
+
+const jsonLdNodes = [
+  organizationLd(),
+  breadcrumbLd(crumbs),
+  itemListLd(items.map((p) => ({ url: path, name: p.name }))),
+];
+---
+<Layout title={title} description={description} path={path} jsonLdNodes={jsonLdNodes}>
+  <Breadcrumbs items={crumbs} />
+  <section class="hero container">
+    <h1>{title} compatibility</h1>
+    <p class="lead">{description}</p>
+    <p class="rail-legend"><strong>Native</strong>/<strong>Direct-fit</strong> plug straight into a {platform.name} battery. <strong>Needs adapter</strong> means a separate adapter is required — see <a href="/methodology">methodology</a>.</p>
+  </section>
+
+  <div class="container">
+    <div class="results--list">
+      <div id="result-list">
+        {items.map((p) => {
+          const fit = FIT[p.fit] ?? { label: p.fit, badge: '' };
+          return (
+            <article class="result card">
+              <div>
+                <h2 class="result-title"><AffiliateLink label={p.name} affiliate={p.affiliate} /></h2>
+                <p class="result-meta">{p.note}{p.battery_included ? ' · battery included' : ' · battery not included'}</p>
+              </div>
+              <span class={`badge ${fit.badge}`}>{fit.label}</span>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+
+    <AdSlot format="inarticle" />
+
+    {related.length > 0 && (
+      <section class="prose" style="margin-top:var(--space-8)">
+        <h2>Related</h2>
+        <ul>
+          {related.map((r) => <li><a href={r.href}>{r.name}</a></li>)}
+        </ul>
+      </section>
+    )}
+  </div>
+</Layout>

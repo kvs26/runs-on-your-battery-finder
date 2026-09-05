@@ -1,0 +1,10 @@
+---
+import Layout from '../layouts/Layout.astro';
+const title = 'Page not found';
+---
+<Layout title={title} description="The page you were looking for doesn't exist." noindex={true}>
+  <section class="hero container" style="text-align:center">
+    <h1>404 — page not found</h1>
+    <p class="lead" style="margin-inline:auto">That page doesn't exist. Try the <a href="/">finder</a>.</p>
+  </section>
+</Layout>

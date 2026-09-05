@@ -1,0 +1,46 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { organizationLd, breadcrumbLd } from '../lib/seo.mjs';
+import { platforms } from '../lib/catalog.mjs';
+const title = 'Methodology';
+const description = 'How every compatibility entry is researched, flagged, and hand-verified before it appears here.';
+const crumbs = [{ name: 'Home', href: '/' }, { name: title }];
+---
+<Layout title={title} description={description} jsonLdNodes={[organizationLd(), breadcrumbLd(crumbs)]}>
+  <Breadcrumbs items={crumbs} />
+  <article class="container prose" style="padding-block:var(--space-12)">
+    <h1>{title}</h1>
+    <p>Every entry is checked by hand against the manufacturer's own listing and the physical battery
+      interface before it is published. We never auto-generate compatibility claims.</p>
+
+    <h2>Platform coverage</h2>
+    <p>We only publish a platform once at least one row has been hand-verified. Live now:</p>
+    <ul>
+      {platforms.map((p) => <li>{p.name}</li>)}
+    </ul>
+    <p>Not yet covered (no hand-verified row exists): Kobalt 24V (Lowe's), Bauer 20V (Harbor Freight),
+      Craftsman V20. We add a platform as soon as we can verify a row for it — <a href="/contact">tell us</a>
+      if you'd like one prioritized.</p>
+
+    <h2>Fit types</h2>
+    <table class="data-table">
+      <thead><tr><th>Flag</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge badge--ok">Native</span></td><td>Built for this exact battery platform by the same brand.</td></tr>
+        <tr><td><span class="badge badge--ok">Direct-fit</span></td><td>A third-party device whose foot accepts this platform's battery without an adapter.</td></tr>
+        <tr><td><span class="badge badge--warn">Needs adapter</span></td><td>Works only with a separate adapter plate; the adapter is called out in the notes.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>What we record</h2>
+    <ul>
+      <li>Battery platform and category.</li>
+      <li>Whether a battery is included in the box.</li>
+      <li>Any adapter required, and a short verification note.</li>
+    </ul>
+
+    <h2>Corrections</h2>
+    <p>Spotted something wrong? <a href="/contact">Tell us</a> — corrections are prioritized.</p>
+  </article>
+</Layout>

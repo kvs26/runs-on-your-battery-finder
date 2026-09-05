@@ -1,0 +1,308 @@
+/* ============================================================================
+ * tokens.css — the factory's design-token + skin system (tickets 07 + 09).
+ * ----------------------------------------------------------------------------
+ * Two layers, per research/09-brand-and-trust-pages.md §2 (USWDS grades +
+ * Material 3 tonal roles):
+ *   LAYER 1  literal, luminance-graded ramps (per hue). A *skin* overrides
+ *            ONLY these values.  Grades run 05 (lightest) -> 90 (darkest);
+ *            a 50+ grade gap ~= WCAG AA text (4.5:1), 40+ ~= AA large (3:1).
+ *   LAYER 2  semantic role tokens mapped onto ramp steps. Components + layouts
+ *            reference ONLY these role names, never a raw ramp/hex.
+ *
+ * Dark mode re-points the SAME role set to the opposite end of each ramp — no
+ * separate skin needed (Material 3 pattern).
+ *
+ * Type / spacing / shape scales are skin-agnostic (a skin may nudge radius).
+ * ========================================================================== */
+
+/* ---------- Brand font machinery (research/09 §1) --------------------------
+ * Self-hosted variable WOFF2 + metric-matched system fallback so a webfont
+ * never causes swap-CLS.  Drop a real /fonts/brand.woff2 in to activate it;
+ * with `font-display: optional` a missing file degrades to the system stack
+ * with zero layout jank, so the template builds + renders fine without it.
+ * Preload the woff2 in BaseHead for warm-load branded LCP text. */
+@font-face {
+  font-family: 'Brand Sans';
+  src: url('/fonts/brand.woff2') format('woff2');
+  font-weight: 100 900;         /* variable */
+  font-style: normal;
+  font-display: optional;       /* no swap -> no font-swap CLS */
+}
+/* Metric-matched alias of the system fallback: tune size-adjust/overrides to
+ * the real font once chosen so the swap (if any) shifts nothing. */
+@font-face {
+  font-family: 'Brand Sans Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Segoe UI'), local('Roboto');
+  size-adjust: 100%;
+  ascent-override: 92%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+/* Optional display/heading face (may use swap — a late headline is cheap). */
+@font-face {
+  font-family: 'Brand Display';
+  src: url('/fonts/brand-display.woff2') format('woff2');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* --- Type scale (research/07): ~1.25 modular, 7 steps ------------------ */
+  --font-sans: 'Brand Sans', 'Brand Sans Fallback', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Brand Display', var(--font-sans);
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.25rem;
+  --text-lg: 1.5rem;
+  --text-xl: 2rem;
+  --text-2xl: 2.5rem;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+  --leading: 1.55;
+
+  /* --- Spacing scale (research/07): 4px base, 8 discrete steps ----------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* --- Shape / elevation (skins may override) --------------------------- */
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+
+  --measure: 68ch;       /* readable prose line length */
+  --container: 1120px;   /* max content width */
+  --sidebar: 300px;      /* app-shell filter rail width */
+}
+
+/* ============================================================================
+ * LAYER 1 — literal ramps.  Default skin = "neutral".
+ * Lightness is graded so contrast is a subtraction, not a guess.
+ * A skin re-declares these on [data-skin="..."]; roles below never change.
+ * ========================================================================== */
+:root,
+[data-skin='neutral'] {
+  /* neutral gray ramp */
+  --n-00: hsl(220 20% 100%);
+  --n-05: hsl(220 24% 97%);
+  --n-10: hsl(220 22% 94%);
+  --n-20: hsl(220 18% 88%);
+  --n-30: hsl(220 15% 80%);
+  --n-40: hsl(220 12% 64%);
+  --n-50: hsl(220 11% 50%);
+  --n-60: hsl(220 13% 40%);
+  --n-70: hsl(220 16% 30%);
+  --n-80: hsl(220 20% 20%);
+  --n-90: hsl(220 26% 12%);
+
+  /* brand hue ramp (indigo/blue) */
+  --b-05: hsl(224 90% 97%);
+  --b-10: hsl(224 88% 93%);
+  --b-20: hsl(224 86% 86%);
+  --b-30: hsl(224 82% 74%);
+  --b-40: hsl(224 76% 60%);
+  --b-50: hsl(224 72% 50%);
+  --b-60: hsl(224 74% 42%);
+  --b-70: hsl(224 78% 34%);
+  --b-80: hsl(224 80% 26%);
+  --b-90: hsl(224 82% 18%);
+
+  /* status hues (single working step each, plus a tint) */
+  --ok-50: hsl(150 60% 32%);
+  --ok-10: hsl(150 55% 92%);
+  --warn-50: hsl(36 92% 38%);
+  --warn-10: hsl(40 90% 92%);
+  --bad-50: hsl(2 72% 44%);
+  --bad-10: hsl(2 72% 94%);
+}
+
+/* ============================================================================
+ * LAYER 2 — semantic roles (skin-agnostic). LIGHT theme.
+ * Components reference ONLY these.  Grade gaps chosen to clear WCAG AA.
+ * ========================================================================== */
+:root {
+  --color-bg: var(--n-05);
+  --color-surface: var(--n-00);
+  --color-surface-2: var(--n-10);
+  --color-text: var(--n-90);          /* gap ~80 vs bg  -> AA+ */
+  --color-text-muted: var(--n-60);    /* gap ~55 vs bg  -> AA  */
+  --color-primary: var(--b-60);       /* AA text-on-primary w/ white */
+  --color-primary-hover: var(--b-70);
+  --color-primary-tint: var(--b-05);
+  --color-on-primary: hsl(0 0% 100%);
+  --color-border: var(--n-30);        /* gap vs surface >= 3:1 (1.4.11) */
+  --color-border-strong: var(--n-40);
+  --color-focus: var(--b-50);
+  --color-success: var(--ok-50);
+  --color-success-tint: var(--ok-10);
+  --color-warning: var(--warn-50);
+  --color-warning-tint: var(--warn-10);
+  --color-danger: var(--bad-50);
+  --color-danger-tint: var(--bad-10);
+}
+
+/* ---------- DARK mode: re-point the same roles to the opposite ramp end ----
+ * Triggered by an explicit [data-theme="dark"] (toggle) OR system preference
+ * when the site hasn't forced a theme. The luminance grading preserves the
+ * AA gaps when flipped. */
+[data-theme='dark'] {
+  --color-bg: var(--n-90);
+  --color-surface: var(--n-80);
+  --color-surface-2: var(--n-70);
+  --color-text: var(--n-05);
+  --color-text-muted: var(--n-40);
+  --color-primary: var(--b-30);
+  --color-primary-hover: var(--b-20);
+  --color-primary-tint: var(--b-90);
+  --color-on-primary: var(--n-90);
+  --color-border: var(--n-70);
+  --color-border-strong: var(--n-60);
+  --color-focus: var(--b-30);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']):not([data-theme='dark']) {
+    --color-bg: var(--n-90);
+    --color-surface: var(--n-80);
+    --color-surface-2: var(--n-70);
+    --color-text: var(--n-05);
+    --color-text-muted: var(--n-40);
+    --color-primary: var(--b-30);
+    --color-primary-hover: var(--b-20);
+    --color-primary-tint: var(--b-90);
+    --color-on-primary: var(--n-90);
+    --color-border: var(--n-70);
+    --color-border-strong: var(--n-60);
+    --color-focus: var(--b-30);
+  }
+}
+
+/* ============================================================================
+ * REACHABLE SKINS — override LAYER 1 ramps only. Roles + components untouched.
+ * Prove the token system's range without editing markup.
+ * ========================================================================== */
+
+/* editorial — warm, magazine, serif-display, generous radius */
+[data-skin='editorial'] {
+  --n-00: hsl(38 40% 100%);
+  --n-05: hsl(38 44% 97%);
+  --n-10: hsl(38 38% 93%);
+  --n-20: hsl(36 30% 87%);
+  --n-30: hsl(34 24% 79%);
+  --n-40: hsl(32 18% 62%);
+  --n-50: hsl(30 14% 48%);
+  --n-60: hsl(28 16% 38%);
+  --n-70: hsl(26 20% 28%);
+  --n-80: hsl(24 24% 18%);
+  --n-90: hsl(22 30% 11%);
+  --b-05: hsl(348 80% 97%);
+  --b-10: hsl(348 78% 93%);
+  --b-20: hsl(348 72% 86%);
+  --b-30: hsl(348 66% 72%);
+  --b-40: hsl(348 62% 58%);
+  --b-50: hsl(348 64% 48%);
+  --b-60: hsl(348 66% 40%);
+  --b-70: hsl(348 68% 32%);
+  --b-80: hsl(348 70% 25%);
+  --b-90: hsl(348 72% 18%);
+  --font-display: 'Brand Display', Georgia, 'Times New Roman', serif;
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+
+/* technical — cool slate, tight radius, dense */
+[data-skin='technical'] {
+  --n-00: hsl(210 20% 100%);
+  --n-05: hsl(210 28% 97%);
+  --n-10: hsl(210 26% 93%);
+  --n-20: hsl(210 22% 87%);
+  --n-30: hsl(210 18% 78%);
+  --n-40: hsl(210 14% 62%);
+  --n-50: hsl(210 12% 48%);
+  --n-60: hsl(210 15% 38%);
+  --n-70: hsl(210 20% 28%);
+  --n-80: hsl(210 26% 18%);
+  --n-90: hsl(210 32% 11%);
+  --b-05: hsl(190 90% 96%);
+  --b-10: hsl(190 86% 90%);
+  --b-20: hsl(190 82% 80%);
+  --b-30: hsl(190 78% 64%);
+  --b-40: hsl(192 74% 48%);
+  --b-50: hsl(194 80% 40%);
+  --b-60: hsl(196 84% 33%);
+  --b-70: hsl(198 86% 27%);
+  --b-80: hsl(200 88% 21%);
+  --b-90: hsl(202 90% 15%);
+  --radius-sm: 2px;
+  --radius: 4px;
+  --radius-lg: 6px;
+}
+
+/* playful — friendly teal + rounded, soft surfaces */
+[data-skin='playful'] {
+  --n-00: hsl(170 30% 100%);
+  --n-05: hsl(170 34% 97%);
+  --n-10: hsl(168 30% 93%);
+  --n-20: hsl(166 26% 87%);
+  --n-30: hsl(164 22% 79%);
+  --n-40: hsl(162 16% 62%);
+  --n-50: hsl(160 14% 48%);
+  --n-60: hsl(180 16% 36%);
+  --n-70: hsl(190 22% 26%);
+  --n-80: hsl(196 28% 17%);
+  --n-90: hsl(200 34% 11%);
+  --b-05: hsl(280 80% 97%);
+  --b-10: hsl(280 76% 93%);
+  --b-20: hsl(280 70% 86%);
+  --b-30: hsl(280 64% 74%);
+  --b-40: hsl(282 58% 60%);
+  --b-50: hsl(284 56% 50%);
+  --b-60: hsl(286 58% 42%);
+  --b-70: hsl(288 60% 34%);
+  --b-80: hsl(290 62% 26%);
+  --b-90: hsl(292 64% 19%);
+  --radius: 16px;
+  --radius-lg: 22px;
+  --shadow: 0 8px 24px rgba(80, 30, 120, 0.12);
+}
+
+/* dark — ships the neutral ramp but forces the dark role re-point.
+ * Applied by pairing data-skin="dark" with data-theme="dark" in the Layout. */
+[data-skin='dark'] {
+  --b-05: hsl(224 90% 97%);
+  --b-10: hsl(224 88% 93%);
+  --b-20: hsl(224 86% 86%);
+  --b-30: hsl(224 82% 74%);
+  --b-40: hsl(224 76% 60%);
+  --b-50: hsl(224 72% 52%);
+  --b-60: hsl(224 74% 44%);
+  --b-70: hsl(224 78% 36%);
+  --b-80: hsl(224 80% 28%);
+  --b-90: hsl(224 82% 20%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

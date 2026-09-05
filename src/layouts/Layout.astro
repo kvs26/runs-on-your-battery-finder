@@ -1,0 +1,85 @@
+---
+/**
+ * Layout.astro — the factory's BASE app-shell (dir 08). Every page uses it.
+ * Sets <html> lang + active skin + theme, wires the SEO head, skip link,
+ * header, footer, and the inline no-flash theme bootstrap.
+ *
+ * Props are forwarded to BaseHead (title/description/path/ogImage/jsonLdNodes).
+ */
+import '../styles/tokens.css';
+import '../styles/base.css';
+import { SITE } from '../lib/site.config.mjs';
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  path?: string;
+  ogImage?: string;
+  ogImageAlt?: string;
+  jsonLdNodes?: unknown[];
+  noindex?: boolean;
+}
+const props = Astro.props;
+// The "dark" skin ships the neutral ramp but defaults the theme to dark.
+const initialTheme = SITE.skin === 'dark' ? 'dark' : undefined;
+---
+<!doctype html>
+<html lang={SITE.lang} data-skin={SITE.skin} data-theme={initialTheme}>
+  <head>
+    <BaseHead {...props} />
+    {SITE.enableDarkModeToggle && (
+      <script is:inline>
+        // No-flash theme bootstrap: apply saved preference before first paint.
+        (function () {
+          try {
+            var t = localStorage.getItem('theme');
+            if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+          } catch (e) {}
+        })();
+      </script>
+    )}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+
+    {SITE.enableDarkModeToggle && (
+      <script is:inline>
+        (function () {
+          var btn = document.querySelector('[data-theme-toggle]');
+          if (!btn) return;
+          btn.addEventListener('click', function () {
+            var root = document.documentElement;
+            var cur = root.getAttribute('data-theme');
+            var next = cur === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            try { localStorage.setItem('theme', next); } catch (e) {}
+          });
+        })();
+      </script>
+    )}
+    <script is:inline>
+      // Consent-banner scaffold: only surfaces if a cookie-based provider marks
+      // the page as needing consent (inert by default — Cloudflare/Plausible/none).
+      (function () {
+        var banner = document.querySelector('[data-consent-banner]');
+        if (!banner) return;
+        var need = document.documentElement.getAttribute('data-needs-consent') === 'true';
+        try { if (localStorage.getItem('consent') === 'ok') need = false; } catch (e) {}
+        if (need) banner.setAttribute('data-active', 'true');
+        var ok = banner.querySelector('[data-consent-accept]');
+        if (ok) ok.addEventListener('click', function () {
+          try { localStorage.setItem('consent', 'ok'); } catch (e) {}
+          banner.removeAttribute('data-active');
+        });
+      })();
+    </script>
+  </body>
+</html>

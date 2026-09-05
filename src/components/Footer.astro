@@ -1,0 +1,42 @@
+---
+/**
+ * Footer.astro — trust/E-E-A-T + legal interlink (research/09 §4), the FTC
+ * affiliate disclosure line, and the hidden consent-banner scaffold (ticket 04,
+ * only shown if a cookie-based analytics/ads provider is ever enabled).
+ */
+import { SITE } from '../lib/site.config.mjs';
+const year = new Date().getFullYear();
+const affiliateOn = SITE.monetization.affiliate.enabled;
+---
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <a class="brand" href="/"><span>{SITE.name}</span></a>
+        <p class="muted" style="margin-top:var(--space-3)">{SITE.tagline}</p>
+        {affiliateOn && (
+          <p class="affiliate-disclosure">{SITE.monetization.affiliate.disclosure}</p>
+        )}
+      </div>
+
+      {SITE.footer.map((group) => (
+        <div class="footer-col">
+          <h2>{group.heading}</h2>
+          <ul>
+            {group.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <div class="footer-legal">
+      <p>© {year} {SITE.name}. Data hand-verified; see the <a href="/methodology">methodology</a>.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- Consent banner scaffold — inert until a cookie-based provider needs it. -->
+<div class="consent-banner" data-consent-banner role="dialog" aria-label="Cookie consent">
+  <p style="margin:0">We use privacy-friendly analytics. See our <a href="/privacy">privacy policy</a>.</p>
+  <button class="btn" type="button" data-consent-accept>OK</button>
+</div>

@@ -1,0 +1,143 @@
+---
+/**
+ * index.astro — HOME + interactive tool page (app-shell base, dir 08).
+ * All products are server-rendered (crawlable, SEO) inside the results pane;
+ * the vanilla-JS island filters them client-side (show/hide) — the only client
+ * JS in production (ticket 08). Layout mode (list vs grid) follows SITE.layoutMode.
+ */
+import Layout from '../layouts/Layout.astro';
+import AdSlot from '../components/AdSlot.astro';
+import AffiliateLink from '../components/AffiliateLink.astro';
+import { SITE } from '../lib/site.config.mjs';
+import { platforms, categories, products, FIT, platformBySlug, categoryBySlug } from '../lib/catalog.mjs';
+import {
+  organizationLd,
+  websiteLd,
+  webApplicationLd,
+  itemListLd,
+} from '../lib/seo.mjs';
+
+const mode = SITE.layoutMode === 'grid' ? 'grid' : 'list';
+const description =
+  'Pick a battery platform and category to find every gadget that runs on it — each flagged native, direct-fit, or needs-adapter, and hand-verified.';
+const coverageNames = platforms.map((p) => p.name).join(', ');
+
+const jsonLdNodes = [
+  organizationLd(),
+  websiteLd(),
+  webApplicationLd({
+    name: `${SITE.name} Finder`,
+    description,
+    url: '/',
+  }),
+  itemListLd(products.map((p) => ({ url: `/${p.platform}/${p.category}`, name: p.name }))),
+];
+---
+<Layout title={null} description={description} jsonLdNodes={jsonLdNodes}>
+  <section class="hero container">
+    <h1>What runs on your battery?</h1>
+    <p class="lead">{description}</p>
+    <ol class="steps">
+      <li><strong>Pick your battery platform</strong> below (or leave it on "All platforms" to browse everything).</li>
+      <li><strong>Pick a category</strong> — fan, vacuum, light, and more — or browse all categories.</li>
+      <li><strong>Check the badge</strong> on each result: <span class="badge badge--ok">Native</span>/<span class="badge badge--ok">Direct-fit</span> plug straight in; <span class="badge badge--warn">Needs adapter</span> means you'll need an extra part (linked in the note).</li>
+    </ol>
+    <p class="coverage-note">Currently covering <strong>{coverageNames}</strong> — hand-verified only, so a few smaller brands (Kobalt, Bauer) aren't listed yet. See <a href="/methodology">methodology</a>.</p>
+  </section>
+
+  <form class="app-shell container" aria-label="Compatibility finder">
+    <!-- FILTER RAIL -->
+    <aside class="rail card">
+      <div class="field">
+        <label for="f-platform">Battery platform</label>
+        <select id="f-platform" name="platform" data-filter="platform">
+          <option value="">All platforms</option>
+          {platforms.map((p) => <option value={p.slug}>{p.name}</option>)}
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-category">Category</label>
+        <select id="f-category" name="category" data-filter="category">
+          <option value="">All categories</option>
+          {categories.map((c) => <option value={c.slug}>{c.name}</option>)}
+        </select>
+      </div>
+      <fieldset class="field">
+        <span class="legend">Fit type</span>
+        <label class="choice"><input type="checkbox" name="fit" value="native" data-filter="fit"> Native</label>
+        <label class="choice"><input type="checkbox" name="fit" value="direct" data-filter="fit"> Direct-fit</label>
+        <label class="choice"><input type="checkbox" name="fit" value="adapter" data-filter="fit"> Needs adapter</label>
+      </fieldset>
+      <p class="rail-legend">
+        <strong>Native</strong> = made by the battery's own brand.
+        <strong>Direct-fit</strong> = third-party, no adapter needed.
+        <strong>Needs adapter</strong> = works via a separate adapter plate — check the note before buying.
+      </p>
+    </aside>
+
+    <!-- RESULTS PANE -->
+    <div class={`results-pane results--${mode}`}>
+      <div class="results-head">
+        <h2 class="visually-hidden">Results</h2>
+        <p class="result-count" data-result-count aria-live="polite">{products.length} results</p>
+      </div>
+
+      <div id="result-list">
+        {products.map((p) => {
+          const fit = FIT[p.fit] ?? { label: p.fit, badge: '' };
+          const platformName = platformBySlug(p.platform)?.name ?? p.platform;
+          const categoryName = categoryBySlug(p.category)?.name ?? p.category;
+          return (
+            <article class="result card" data-platform={p.platform} data-category={p.category} data-fit={p.fit}>
+              {mode === 'grid' && <div class="thumb" aria-hidden="true">image</div>}
+              <div>
+                <p class="result-tags">
+                  <span class="chip">{platformName}</span>
+                  <span class="chip chip--muted">{categoryName}</span>
+                </p>
+                <h3 class="result-title"><AffiliateLink label={p.name} affiliate={p.affiliate} /></h3>
+                <p class="result-meta">{p.note}</p>
+              </div>
+              <span class={`badge ${fit.badge}`}>{fit.label}</span>
+            </article>
+          );
+        })}
+      </div>
+
+      <p class="empty-state" data-empty hidden>No matches. Try clearing a filter.</p>
+
+      <!-- MONETIZATION HOLE: ad after the result, space reserved (no CLS). -->
+      <AdSlot format="rectangle" label="Ad slot · 300×250 · reserved (empty until approved)" />
+    </div>
+  </form>
+</Layout>
+
+<script>
+  // Vanilla-JS filter island (ticket 08). Show/hide server-rendered results.
+  const form = document.querySelector('.app-shell');
+  if (form) {
+    const items = Array.from(form.querySelectorAll('.result'));
+    const countEl = form.querySelector('[data-result-count]');
+    const emptyEl = form.querySelector('[data-empty]');
+
+    function apply() {
+      const platform = form.querySelector('[data-filter="platform"]').value;
+      const category = form.querySelector('[data-filter="category"]').value;
+      const fits = Array.from(form.querySelectorAll('[data-filter="fit"]:checked')).map((el) => el.value);
+      let shown = 0;
+      for (const el of items) {
+        const ok =
+          (!platform || el.dataset.platform === platform) &&
+          (!category || el.dataset.category === category) &&
+          (fits.length === 0 || fits.includes(el.dataset.fit));
+        el.hidden = !ok;
+        if (ok) shown++;
+      }
+      if (countEl) countEl.textContent = shown + (shown === 1 ? ' result' : ' results');
+      if (emptyEl) emptyEl.hidden = shown !== 0;
+    }
+
+    form.addEventListener('change', apply);
+    form.addEventListener('submit', (e) => e.preventDefault());
+  }
+</script>

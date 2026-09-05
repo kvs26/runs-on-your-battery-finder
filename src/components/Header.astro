@@ -1,0 +1,41 @@
+---
+/**
+ * Header.astro — app-shell header: CSS/text wordmark (zero-asset default,
+ * recolors per skin), primary nav, optional light/dark toggle.
+ * Swap the .mark span for an inline <svg fill="currentColor"> to upgrade the
+ * logo without touching layout (research/09 §3).
+ */
+import { SITE } from '../lib/site.config.mjs';
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+---
+<header class="site-header">
+  <div class="container bar">
+    <a class="brand" href="/">
+      <span class="mark" aria-hidden="true">
+        <!-- Inline-SVG logo upgrade slot: replace with a real mark, keeps currentColor theming. -->
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true">
+          <path d="M4 13h6l-1 8 11-13h-6l1-8z" />
+        </svg>
+      </span>
+      <span>{SITE.name}</span>
+    </a>
+
+    <div class="header-actions">
+      <nav class="site-nav" aria-label="Primary">
+        {SITE.nav.map((item) => {
+          const href = item.href.replace(/\/$/, '') || '/';
+          const current = href === path ? 'page' : undefined;
+          return <a href={item.href} aria-current={current}>{item.label}</a>;
+        })}
+      </nav>
+
+      {SITE.enableDarkModeToggle && (
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark mode">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36A5.5 5.5 0 0 1 12 3z" />
+          </svg>
+        </button>
+      )}
+    </div>
+  </div>
+</header>
