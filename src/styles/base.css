@@ -139,7 +139,15 @@ code, kbd { font-family: var(--font-mono); font-size: 0.9em; }
     padding-top: var(--space-3);
     border-top: 1px solid var(--color-border);
   }
-  .site-nav { flex-wrap: wrap; gap: var(--space-3) var(--space-4); }
+  /* Keep the nav on one line — scroll horizontally instead of wrapping to a
+     second row (which used to overlap the theme toggle). */
+  .site-nav {
+    flex: 1 1 auto; min-width: 0; flex-wrap: nowrap;
+    overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .site-nav::-webkit-scrollbar { display: none; }
+  .site-nav a { flex-shrink: 0; }
+  .theme-toggle { flex-shrink: 0; }
 }
 
 /* ---------- Breadcrumbs ---------- */
