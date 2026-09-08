@@ -231,7 +231,7 @@ code, kbd { font-family: var(--font-mono); font-size: 0.9em; }
   font-weight: var(--weight-semibold);
   font-size: var(--text-sm); margin-bottom: var(--space-2); color: var(--color-text);
 }
-.field select, .field input[type='text'], .field input[type='number'] {
+.field select, .field input[type='text'], .field input[type='number'], .field input[type='search'] {
   width: 100%; font: inherit; font-size: var(--text-sm);
   padding: var(--space-3) var(--space-4);
   color: var(--color-text); background: var(--color-surface);
@@ -243,6 +243,7 @@ code, kbd { font-family: var(--font-mono); font-size: 0.9em; }
   outline: none; border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-tint);
 }
+.field input[type='search']::-webkit-search-cancel-button { -webkit-appearance: none; }
 .field select {
   appearance: none; -webkit-appearance: none;
   padding-right: var(--space-8); cursor: pointer;
@@ -321,6 +322,9 @@ fieldset.field { border: 0; margin: 0 0 var(--space-6); padding: 0; }
 .chip--muted { background: transparent; color: var(--color-text-muted); padding-inline: 0; }
 
 /* LAYOUT MODE B — card-grid */
+.results--grid {
+  margin-bottom: var(--space-12);
+}
 .results--grid #result-list {
   display: grid; gap: var(--space-4);
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -333,6 +337,7 @@ fieldset.field { border: 0; margin: 0 0 var(--space-6); padding: 0; }
   display: grid; place-items: center; color: var(--color-text-muted);
   font-size: var(--text-sm); font-weight: var(--weight-medium);
 }
+img.thumb { object-fit: cover; width: 100%; height: auto; }
 .results--grid .result .result-title { font-size: var(--text-base); }
 
 /* ---------- Fit / status badges (high contrast, clear hierarchy) ---------- */

@@ -7,9 +7,8 @@
  */
 import Layout from '../layouts/Layout.astro';
 import AdSlot from '../components/AdSlot.astro';
-import AffiliateLink from '../components/AffiliateLink.astro';
 import { SITE } from '../lib/site.config.mjs';
-import { platforms, categories, products, FIT, platformBySlug, categoryBySlug } from '../lib/catalog.mjs';
+import { platforms, categories, products, FIT, REGIONS, platformBySlug, categoryBySlug } from '../lib/catalog.mjs';
 import {
   organizationLd,
   websiteLd,
@@ -52,11 +51,17 @@ const jsonLdNodes = [
     <aside class="rail">
       <p class="rail-title">Filters</p>
       <div class="field">
-        <label for="f-platform">Your battery</label>
-        <select id="f-platform" name="platform" data-filter="platform">
-          <option value="">All batteries</option>
-          {platforms.map((p) => <option value={p.slug}>{p.name}</option>)}
+        <label for="f-region">Your region</label>
+        <select id="f-region" name="region" data-filter="region">
+          {REGIONS.map((r) => <option value={r.code}>{r.name}</option>)}
         </select>
+      </div>
+      <div class="field">
+        <label for="f-platform">Your battery</label>
+        <input id="f-platform" type="search" list="platform-list" placeholder="e.g. DeWalt, Milwaukee, Ryobi…" data-filter="platform-search" autocomplete="off" />
+        <datalist id="platform-list">
+          {platforms.map((p) => <option data-slug={p.slug} data-regions={(p.regions ?? ['US']).join(',')} value={p.name} />)}
+        </datalist>
       </div>
       <div class="field">
         <label for="f-category">Gadget type</label>
@@ -101,15 +106,16 @@ const jsonLdNodes = [
           const fit = FIT[p.fit] ?? { label: p.fit, badge: '' };
           const platformName = platformBySlug(p.platform)?.name ?? p.platform;
           const categoryName = categoryBySlug(p.category)?.name ?? p.category;
+          const platformRegions = (platformBySlug(p.platform)?.regions ?? ['US']).join(',');
           return (
-            <article class="result" data-platform={p.platform} data-category={p.category} data-fit={p.fit}>
+            <article class="result" data-platform={p.platform} data-platform-name={platformName.toLowerCase()} data-category={p.category} data-fit={p.fit} data-regions={platformRegions}>
               {mode === 'grid' && <div class="thumb" aria-hidden="true">image</div>}
               <div>
                 <p class="result-tags">
-                  <span class="chip">{platformName}</span>
-                  <span class="chip chip--muted">{categoryName}</span>
+                  <a class="chip" href={`/${p.platform}/`}>{platformName}</a>
+                  <a class="chip chip--muted" href={`/${p.platform}/${p.category}/`}>{categoryName}</a>
                 </p>
-                <h3 class="result-title"><AffiliateLink label={p.name} affiliate={p.affiliate} /></h3>
+                <h3 class="result-title"><a href={`/${p.platform}/${p.category}/`}>{p.name}</a></h3>
                 <p class="result-meta">{p.note}</p>
               </div>
               <span class={`badge ${fit.badge}`}>{fit.label}</span>
@@ -145,17 +151,55 @@ const jsonLdNodes = [
     let filtered = items.slice();
     let page = 1;
 
+    const REGION_KEY = 'royb_region';
+    const regionSelect = shell.querySelector('[data-filter="region"]');
+    const platformSearch = shell.querySelector('[data-filter="platform-search"]');
+    const platformList = document.getElementById('platform-list');
+    const platformListOptions = platformList ? Array.from(platformList.options) : [];
+
+    function currentRegion() {
+      return (regionSelect && regionSelect.value) || 'US';
+    }
+
+    // Region availability: only suggest batteries actually sold in the selected region.
+    function applyRegionToPlatformSuggestions() {
+      const region = currentRegion();
+      for (const opt of platformListOptions) {
+        const regions = (opt.dataset.regions || 'US').split(',');
+        opt.disabled = !regions.includes(region);
+        if (opt.disabled && platformList) platformList.removeChild(opt);
+        else if (!opt.disabled && platformList && !platformList.contains(opt)) platformList.appendChild(opt);
+      }
+    }
+
     function applyFilters() {
-      const platform = shell.querySelector('[data-filter="platform"]').value;
+      applyRegionToPlatformSuggestions();
+      const region = currentRegion();
+      const search = platformSearch ? platformSearch.value.trim().toLowerCase() : '';
       const category = shell.querySelector('[data-filter="category"]').value;
       const fits = Array.from(shell.querySelectorAll('[data-filter="fit"]:checked')).map((el) => el.value);
       filtered = items.filter((el) =>
-        (!platform || el.dataset.platform === platform) &&
+        (el.dataset.regions || 'US').split(',').includes(region) &&
+        (!search || (el.dataset.platformName || '').includes(search)) &&
         (!category || el.dataset.category === category) &&
         (fits.length === 0 || fits.includes(el.dataset.fit))
       );
       page = 1;
       render();
+    }
+
+    // Restore persisted region (default US), then apply on load.
+    if (regionSelect) {
+      try {
+        regionSelect.value = localStorage.getItem(REGION_KEY) || 'US';
+      } catch (e) { /* localStorage unavailable (private mode) — default stays US */ }
+      regionSelect.addEventListener('change', () => {
+        try { localStorage.setItem(REGION_KEY, regionSelect.value); } catch (e) { /* ignore */ }
+        applyFilters();
+      });
+    }
+    if (platformSearch) {
+      platformSearch.addEventListener('input', applyFilters);
     }
 
     function render() {
@@ -208,6 +252,6 @@ const jsonLdNodes = [
 
     shell.addEventListener('change', applyFilters);
     shell.addEventListener('submit', (e) => e.preventDefault());
-    render();
+    applyFilters();
   }
 </script>

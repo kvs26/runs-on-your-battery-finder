@@ -8,7 +8,7 @@ import Layout from '../../layouts/Layout.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import AffiliateLink from '../../components/AffiliateLink.astro';
-import { platformCategoryPairs, productsFor, platforms, FIT } from '../../lib/catalog.mjs';
+import { platformCategoryPairs, productsFor, platforms, FIT, REGIONS } from '../../lib/catalog.mjs';
 import { organizationLd, breadcrumbLd, itemListLd } from '../../lib/seo.mjs';
 
 export function getStaticPaths() {
@@ -42,6 +42,11 @@ const jsonLdNodes = [
   breadcrumbLd(crumbs),
   itemListLd(items.map((p) => ({ url: path, name: p.name }))),
 ];
+
+// The region selector only matters for platforms that aren't sold everywhere —
+// for global platforms it would just be a no-op control, so skip it.
+const platformRegions = platform.regions ?? ['US'];
+const isRegionRestricted = platformRegions.length < REGIONS.length;
 ---
 <Layout title={title} description={description} path={path} jsonLdNodes={jsonLdNodes}>
   <Breadcrumbs items={crumbs} />
@@ -49,6 +54,17 @@ const jsonLdNodes = [
     <h1>{title} compatibility</h1>
     <p class="lead">{description}</p>
     <p class="rail-legend"><strong>Made for it</strong> and <strong>Fits as-is</strong> click straight onto a {platform.name} battery. <strong>Needs adapter</strong> means a separate part is required — see <a href="/methodology">how we check</a>.</p>
+    {isRegionRestricted && (
+      <>
+        <div class="field" style="max-width:16rem">
+          <label for="f-region">Your region</label>
+          <select id="f-region" data-platform-regions={platformRegions.join(',')} data-platform-name={platform.name}>
+            {REGIONS.map((r) => <option value={r.code}>{r.name}</option>)}
+          </select>
+        </div>
+        <p class="empty-state" data-region-notice hidden>{platform.name} isn't verified as sold in your selected region yet — see <a href="/methodology">how we check</a>.</p>
+      </>
+    )}
   </section>
 
   <div class="container">
@@ -81,3 +97,28 @@ const jsonLdNodes = [
     )}
   </div>
 </Layout>
+
+<script>
+  // Region banner island: reuses the homepage's persisted region choice
+  // (localStorage key `royb_region`) to flag when this platform isn't
+  // verified as sold in the visitor's selected region. Does not hide
+  // content — this is a directly-navigated URL, so the page still renders
+  // in full; it's advisory only (per PRD: long-tail URLs stay region-agnostic).
+  const REGION_KEY = 'royb_region';
+  const regionSelect = document.getElementById('f-region');
+  const notice = document.querySelector('[data-region-notice]');
+  if (regionSelect) {
+    try {
+      regionSelect.value = localStorage.getItem(REGION_KEY) || 'US';
+    } catch (e) { /* localStorage unavailable — default stays US */ }
+    const update = () => {
+      const regions = (regionSelect.dataset.platformRegions || 'US').split(',');
+      if (notice) notice.hidden = regions.includes(regionSelect.value);
+    };
+    regionSelect.addEventListener('change', () => {
+      try { localStorage.setItem(REGION_KEY, regionSelect.value); } catch (e) { /* ignore */ }
+      update();
+    });
+    update();
+  }
+</script>

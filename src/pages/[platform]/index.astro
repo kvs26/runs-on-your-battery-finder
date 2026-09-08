@@ -41,7 +41,7 @@ const jsonLdNodes = [
       <div id="result-list">
         {cats.map((c) => (
           <a class="result card" href={`/${platform.slug}/${c.slug}`}>
-            <div class="thumb" aria-hidden="true">{c.name}</div>
+            <img class="thumb" src={`/images/categories/${c.slug}.jpg`} alt={c.name} loading="lazy" width="640" height="427" />
             <h2 class="result-title">{c.name}</h2>
             <p class="result-meta">{c.count} compatible {c.count === 1 ? 'product' : 'products'}</p>
           </a>

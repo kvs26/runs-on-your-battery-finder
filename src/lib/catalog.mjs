@@ -38,3 +38,19 @@ export const FIT = {
   direct: { label: 'Fits as-is', badge: 'badge--fit' },
   adapter: { label: 'Needs adapter', badge: 'badge--warn' },
 };
+
+/** Region toggle: internal code -> full display name (PRD: display full country names). */
+export const REGIONS = [
+  { code: 'US', name: 'United States' },
+  { code: 'UK', name: 'United Kingdom' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'IT', name: 'Italy' },
+  { code: 'ES', name: 'Spain' },
+];
+
+/** Platforms actually sold in a given region code (falls back to all platforms if region is falsy). */
+export function platformsForRegion(regionCode) {
+  if (!regionCode) return platforms;
+  return platforms.filter((p) => Array.isArray(p.regions) && p.regions.includes(regionCode));
+}

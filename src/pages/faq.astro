@@ -7,9 +7,13 @@ const description = 'Common questions about battery-gadget compatibility and how
 const crumbs = [{ name: 'Home', href: '/' }, { name: title }];
 // NOTE: no FAQPage JSON-LD — Google deprecated the rich result (research/03 §1).
 const faqs = [
-  { q: 'Will any brand battery fit any tool?', a: 'No. A battery always fits its own brand. To use it on another brand you need a gadget that clicks straight on ("fits as-is") or a separate adapter — we mark which on every entry.' },
-  { q: 'Is a battery included?', a: 'Usually not — most of these gadgets are sold as the bare tool. Each entry says whether a battery is in the box.' },
-  { q: 'How current is the data?', a: 'Every entry is checked by hand. See the "How we check" page for the full process.' },
+  { q: 'Will any brand battery fit any tool?', a: 'No. A battery always fits its own brand first. To use it on another brand, you need a gadget that clicks straight on ("fits as-is") or a separate adapter — we mark which one on every entry.' },
+  { q: 'What do "Made for it", "Fits as-is", and "Needs adapter" mean?', a: '"Made for it" means the same brand made both the battery and the gadget. "Fits as-is" means a different brand\'s gadget clicks on with no extra parts. "Needs adapter" means you need one more part to connect them.' },
+  { q: 'Is a battery included with the gadget?', a: 'Usually not — most gadgets here are sold as just the tool, without a battery. Each entry says whether a battery is in the box.' },
+  { q: 'Does this work outside the US?', a: 'Yes, for the platforms marked as available in your country. Use the region selector to switch your country, and only batteries actually sold there will show up.' },
+  { q: "Why isn't my battery platform listed?", a: "We only add a platform once we've hand-checked at least one real gadget for it. If yours is missing, tell us on the contact page and we'll look into it." },
+  { q: 'How current is the data?', a: 'Every entry is checked by hand, and we recheck them over time. See the "How we check" page for the full process.' },
+  { q: 'How do I report a mistake?', a: "Email us from the contact page with the battery and gadget name. Corrections to the data get looked at first." },
 ];
 ---
 <Layout title={title} description={description} jsonLdNodes={[organizationLd(), breadcrumbLd(crumbs)]}>
